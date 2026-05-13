@@ -19,7 +19,9 @@ let pinchStartDistance = 0;
 let pinchStartZoom = 1;
 
 let thumbsVisible = true;
-
+let autoplay = false;
+let autoplayInterval = null;
+let autoplaySpeed = 2000;
 /* ELEMENTS */
 
 const img = document.getElementById("img");
@@ -27,7 +29,8 @@ const thumbs = document.getElementById("thumbs");
 const folderSelect = document.getElementById("folderSelect");
 const info = document.getElementById("info");
 const viewer = document.getElementById("viewer");
-
+const autoplayBtn = document.getElementById("autoplayBtn");
+const speedSelect = document.getElementById("speedSelect");
 /* LOAD */
 
 async function loadManifest() {
@@ -61,7 +64,7 @@ function loadFolder(name) {
   renderThumbs();
 
   resetView();
-
+stopAutoplay();
   render();
 }
 
@@ -159,6 +162,7 @@ window.addEventListener("keydown", (e) => {
 /* RENDER */
 
 function render() {
+  
   const nextSrc = pages[index];
 
   const preload = new Image();
@@ -232,6 +236,45 @@ function rotateRight() {
   rotation += 90;
 
   updateTransform();
+}
+
+
+/* AUTOPLAY */
+
+function startAutoplay() {
+  stopAutoplay();
+
+  autoplay = true;
+
+  autoplayBtn.textContent = "⏸ Stop";
+
+  autoplayInterval = setInterval(() => {
+    if (index >= pages.length - 1) {
+      index = 0;
+
+      resetView();
+      render();
+
+      return;
+    }
+
+    next();
+  }, autoplaySpeed);
+}
+function stopAutoplay() {
+  autoplay = false;
+
+  autoplayBtn.textContent = "▶ Auto";
+
+  clearInterval(autoplayInterval);
+}
+
+function toggleAutoplay() {
+  if (autoplay) {
+    stopAutoplay();
+  } else {
+    startAutoplay();
+  }
 }
 
 /* DESKTOP WHEEL ZOOM */
@@ -381,7 +424,13 @@ function toggleThumbs() {
 folderSelect.addEventListener("change", (e) => {
   loadFolder(e.target.value);
 });
+speedSelect.addEventListener("change", (e) => {
+  autoplaySpeed = Number(e.target.value);
 
+  if (autoplay) {
+    startAutoplay();
+  }
+});
 window.addEventListener("resize", fitImage);
 
 /* INIT */
