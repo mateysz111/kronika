@@ -9,7 +9,14 @@ body {
   color: white;
   overflow: hidden;
 }
+.credit {
+    position: fixed;
+    bottom: 8px;
+    right: 10px;
 
+    font-size: 11px;
+    opacity: 0.35;
+}
 /* TOP BAR */
 
 .bar {
