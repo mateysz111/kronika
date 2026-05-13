@@ -15,6 +15,9 @@ let offsetY = 0;
 let dragging = false;
 let startX, startY;
 
+let pinchStartDistance = 0;
+let pinchStartZoom = 1;
+
 let thumbsVisible = true;
 
 /* ELEMENTS */
@@ -22,7 +25,6 @@ let thumbsVisible = true;
 const img = document.getElementById("img");
 const thumbs = document.getElementById("thumbs");
 const folderSelect = document.getElementById("folderSelect");
-const zoomSlider = document.getElementById("zoom");
 const info = document.getElementById("info");
 const viewer = document.getElementById("viewer");
 
@@ -90,7 +92,6 @@ function resetView() {
   offsetX = 0;
   offsetY = 0;
 
-  zoomSlider.value = 100;
 
   fitImage();
 }
@@ -164,17 +165,24 @@ function render() {
 
   preload.src = nextSrc;
 
-  preload.decode().then(() => {
+  if (preload.decode) {
+    preload
+      .decode()
+      .then(() => {
+        img.src = nextSrc;
+      })
+      .catch(() => {
+        img.src = nextSrc;
+      });
+  } else {
     img.src = nextSrc;
-  });
+  }
 
   info.textContent = `${index + 1} / ${pages.length}`;
 
   document.querySelectorAll(".thumb").forEach((t, i) => {
     t.classList.toggle("active", i === index);
   });
-
-  window.focus();
 }
 
 /* TRANSFORM */
@@ -226,15 +234,7 @@ function rotateRight() {
   updateTransform();
 }
 
-/* ZOOM */
-
-zoomSlider.addEventListener("input", (e) => {
-  zoom = e.target.value / 100;
-
-  updateTransform();
-});
-
-/* POINT ZOOM */
+/* DESKTOP WHEEL ZOOM */
 
 viewer.addEventListener(
   "wheel",
@@ -258,12 +258,13 @@ viewer.addEventListener(
 
     offsetY -= (mouseY - offsetY) * (zoom / prevZoom - 1);
 
+
     updateTransform();
   },
   { passive: false },
 );
 
-/* DRAG */
+/* MOUSE DRAG */
 
 img.addEventListener("mousedown", (e) => {
   dragging = true;
@@ -285,41 +286,85 @@ window.addEventListener("mousemove", (e) => {
   updateTransform();
 });
 
+/* TOUCH HELPERS */
+
+function getTouchDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+
+  return Math.sqrt(dx * dx + dy * dy);
+}
+
 /* TOUCH */
 
-img.addEventListener(
+viewer.addEventListener(
   "touchstart",
   (e) => {
-    const touch = e.touches[0];
+    /* PINCH START */
 
-    dragging = true;
+    if (e.touches.length === 2) {
+      dragging = false;
 
-    startX = touch.clientX - offsetX;
-    startY = touch.clientY - offsetY;
+      pinchStartDistance = getTouchDistance(e.touches);
+
+      pinchStartZoom = zoom;
+
+      return;
+    }
+
+    /* DRAG START */
+
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+
+      dragging = true;
+
+      startX = touch.clientX - offsetX;
+      startY = touch.clientY - offsetY;
+    }
   },
   { passive: true },
 );
 
-window.addEventListener(
+viewer.addEventListener(
   "touchmove",
   (e) => {
-    if (!dragging) return;
+    /* PINCH ZOOM */
 
-    const touch = e.touches[0];
+    if (e.touches.length === 2) {
+      const currentDistance = getTouchDistance(e.touches);
 
-    offsetX = touch.clientX - startX;
-    offsetY = touch.clientY - startY;
+      const scale = currentDistance / pinchStartDistance;
 
-    updateTransform();
+      zoom = pinchStartZoom * scale;
+
+      zoom = Math.min(4, Math.max(0.5, zoom));
+
+
+      updateTransform();
+
+      return;
+    }
+
+    /* DRAG */
+
+    if (e.touches.length === 1 && dragging) {
+      const touch = e.touches[0];
+
+      offsetX = touch.clientX - startX;
+      offsetY = touch.clientY - startY;
+
+      updateTransform();
+    }
   },
   { passive: true },
 );
 
-window.addEventListener("touchend", () => {
+viewer.addEventListener("touchend", () => {
   dragging = false;
 });
 
-/* TOGGLE */
+/* TOGGLE SIDEBAR */
 
 function toggleThumbs() {
   if (window.innerWidth <= 900) {
