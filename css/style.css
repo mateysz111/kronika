@@ -1,0 +1,246 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: #111;
+  font-family: Arial;
+  color: white;
+  overflow: hidden;
+}
+
+/* TOP BAR */
+
+.bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 56px;
+  background: #000;
+  border-bottom: 1px solid #222;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 0 15px;
+  z-index: 100;
+}
+
+button,
+select,
+input {
+  background: #1c1c1c;
+  border: 1px solid #333;
+  color: white;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #2a2a2a;
+}
+
+#zoom {
+  width: 160px;
+}
+
+/* LAYOUT */
+
+.container {
+  display: flex;
+  height: calc(100vh - 56px);
+  margin-top: 56px;
+  overflow: hidden;
+}
+
+/* THUMBS */
+
+.thumbs {
+  width: 260px;
+  background: #0b0b0b;
+  padding: 10px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  align-content: flex-start;
+
+  border-right: 1px solid #1f1f1f;
+
+  transition:
+    transform 0.22s ease,
+    opacity 0.22s ease;
+
+  will-change: transform;
+
+  flex-shrink: 0;
+
+  z-index: 200;
+
+  scrollbar-width: none;
+}
+
+.thumbs.hidden {
+  transform: translateX(-100%);
+}
+
+.thumbs::-webkit-scrollbar {
+  width: 0px;
+}
+
+/* THUMB */
+
+.thumb {
+  width: 110px;
+  aspect-ratio: 3 / 2;
+
+  border: 2px solid transparent;
+  border-radius: 4px;
+
+  overflow: hidden;
+
+  cursor: pointer;
+  opacity: 0.6;
+
+  transition: 0.15s;
+
+  background: #0f0f0f;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb.active {
+  border-color: white;
+  opacity: 1;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* VIEWER */
+
+.viewer {
+  flex: 1;
+  position: relative;
+  background: #151515;
+  overflow: hidden;
+  cursor: grab;
+
+  touch-action: none;
+}
+
+.viewer:active {
+  cursor: grabbing;
+}
+
+/* IMAGE */
+
+#img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  transform-origin: center;
+  will-change: transform;
+
+  user-select: none;
+  -webkit-user-drag: none;
+
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+/* ARROWS */
+
+.arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+
+  background: #1c1c1c;
+  border: 1px solid #333;
+  color: white;
+
+  font-size: 22px;
+  padding: 10px 14px;
+
+  border-radius: 8px;
+  cursor: pointer;
+
+  z-index: 10;
+}
+
+.arrow.left {
+  left: 10px;
+}
+
+.arrow.right {
+  right: 10px;
+}
+
+/* MOBILE */
+
+@media (max-width: 900px) {
+  .thumbs {
+    position: fixed;
+
+    top: 56px;
+    left: 0;
+    bottom: 0;
+
+    width: 100%;
+    max-width: 340px;
+
+    background: rgba(10, 10, 10, 0.98);
+
+    border-right: 1px solid #222;
+
+    padding: 12px;
+
+    transform: translateX(-100%);
+    opacity: 0;
+
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.7);
+  }
+
+  .thumbs.show {
+    transform: translateX(0);
+    opacity: 1;
+  }
+
+  .thumb {
+    width: calc(50% - 4px);
+  }
+
+  .viewer {
+    width: 100%;
+  }
+
+  .arrow {
+    padding: 8px 12px;
+    font-size: 18px;
+  }
+
+  #zoom {
+    width: 90px;
+  }
+
+  .bar {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
