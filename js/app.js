@@ -114,7 +114,7 @@ function renderThumbs() {
     im.loading = "lazy";
     im.decoding = "async";
 
-    im.src = src;
+    im.src = src.replace("/big/", "/thumbs/");
 
     div.appendChild(im);
 

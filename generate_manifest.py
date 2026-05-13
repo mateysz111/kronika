@@ -1,7 +1,7 @@
 import os
 import json
 
-BASE_DIR = "img"
+BASE_DIR = "img/big"
 OUTPUT_FILE = "data/manifest.json"
 
 IMAGE_EXT = (".jpg", ".jpeg", ".png", ".webp")
@@ -37,5 +37,5 @@ os.makedirs(os.path.dirname(OUTPUT_FILE), exist_ok=True)
 with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
     json.dump(manifest, f, indent=2, ensure_ascii=False)
 
-print("OK - wygenerowano manifest")
+print("OK - manifest generated")
 print(json.dumps(manifest, indent=2))

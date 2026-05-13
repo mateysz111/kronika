@@ -3,7 +3,7 @@ import os
 import sys
 
 input_dir = "img/50lat"
-output_dir = "img/50lat_webp"
+output_dir = "img/big/50lat"
 quality = 80
 
 os.makedirs(output_dir, exist_ok=True)

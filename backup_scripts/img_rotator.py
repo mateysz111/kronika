@@ -2,8 +2,8 @@ from PIL import Image
 import os
 import re
 
-input_folder = r"C:\Users\matey\Desktop\kronika2"
-output_folder = r"C:\Users\matey\Desktop\kronikav2"
+input_folder = ""
+output_folder = ""
 
 prefix = "kronika"
 
