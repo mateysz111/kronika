@@ -63,8 +63,10 @@ button:hover {
   height: calc(100vh - 56px);
   margin-top: 56px;
   overflow: hidden;
+      transition:
+        margin-top 0.2s ease,
+        height 0.2s ease;
 }
-
 /* THUMBS */
 
 .thumbs {
@@ -84,20 +86,28 @@ button:hover {
   border-right: 1px solid #1f1f1f;
 
   transition:
-    transform 0.22s ease,
+    width 0.22s ease,
+    padding 0.22s ease,
     opacity 0.22s ease;
-
-  will-change: transform;
 
   flex-shrink: 0;
 
   z-index: 200;
 
   scrollbar-width: none;
+
+  opacity: 1;
 }
 
+/* HIDDEN */
 .thumbs.hidden {
-  transform: translateX(-100%);
+  width: 0;
+  padding: 0;
+  opacity: 0;
+
+  overflow: hidden;
+
+  border-right: none;
 }
 
 .thumbs::-webkit-scrollbar {
@@ -137,7 +147,52 @@ button:hover {
   height: 100%;
   object-fit: cover;
 }
+/* FULLSCREEN */
+:fullscreen .bar {
+    display: none;
+}
+:fullscreen .container {
+    margin-top: 0;
+    height: 100vh;
+}
 
+:fullscreen .thumbs {
+    width: 0;
+    opacity: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* BOTH:
+   requestFullscreen + F11 */
+.fs-mode .bar {
+    display: none;
+}
+
+.fs-mode .thumbs {
+    width: 0;
+    padding: 0;
+    opacity: 0;
+    overflow: hidden;
+    border-right: none;
+}
+
+.fs-mode .container {
+    margin-top: 0;
+    height: 100vh;
+}
+
+:-webkit-full-screen .thumbs {
+    display: none;
+}
+:-webkit-full-screen .container {
+    margin-top: 0;
+    height: 100vh;
+}
+/* safari */
+:-webkit-full-screen .bar {
+    display: none;
+}
 /* VIEWER */
 
 .viewer {
@@ -146,9 +201,11 @@ button:hover {
   background: #151515;
   overflow: hidden;
   cursor: grab;
+  transition: all 0.22s ease;
 
   touch-action: none;
 }
+
 
 .viewer:active {
   cursor: grabbing;
@@ -162,7 +219,7 @@ button:hover {
   left: 50%;
 
   transform-origin: center;
-  will-change: transform;
+  /* will-change: transform; */
 
   user-select: none;
   -webkit-user-drag: none;

@@ -14,6 +14,7 @@ let offsetY = 0;
 
 let dragging = false;
 let startX, startY;
+let resizeTimer;
 
 let pinchStartDistance = 0;
 let pinchStartZoom = 1;
@@ -64,7 +65,7 @@ function loadFolder(name) {
   renderThumbs();
 
   resetView();
-stopAutoplay();
+  stopAutoplay();
   render();
 }
 
@@ -98,6 +99,57 @@ function resetView() {
 
   fitImage();
 }
+async function toggleFullscreen() {
+
+    if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+    } else {
+        await document.exitFullscreen();
+    }
+    
+}
+
+
+window.addEventListener("resize", () => {
+
+    clearTimeout(resizeTimer);
+
+    resizeTimer = setTimeout(() => {
+      fitImage();
+    }, 120);
+
+});
+
+document.addEventListener("fullscreenchange", () => {
+
+    setTimeout(() => {
+      fitImage();
+    }, 120);
+
+});
+
+function isFullscreenLike() {
+
+    return window.innerHeight >= screen.height - 5;
+}
+
+function updateFullscreenUI() {
+
+    const fs =
+        document.fullscreenElement ||
+        isFullscreenLike();
+
+    document.body.classList.toggle("fs-mode", !!fs);
+}
+
+window.addEventListener("resize", updateFullscreenUI);
+
+document.addEventListener(
+    "fullscreenchange",
+    updateFullscreenUI
+);
+
+updateFullscreenUI();
 
 /* THUMBS */
 
