@@ -7,13 +7,13 @@ import re
 # CONFIG
 # =========================
 
-input_folder = Path("img/source")
+input_folder = Path("img/skan")
 
 output_big = Path("img/big")
-output_thumb = Path("img/thumb")
+output_thumb = Path("img/thumbs")
 
 prefix = "kronika"
-SET_NAME = "kronika"
+SET_NAME = "kronika_1946-1987"
 
 ENABLE_ROTATION = True
 ROTATION_ANGLE = -90
