@@ -72,18 +72,24 @@ function loadFolder(name) {
 /* FIT */
 
 function fitImage() {
-  const vw = viewer.clientWidth;
-  const vh = viewer.clientHeight;
 
-  const imgW = 5109;
-  const imgH = 3507;
+const vw = viewer.clientWidth;
+    const vh = viewer.clientHeight;
 
-  const scaleX = vw / imgW;
-  const scaleY = vh / imgH;
+    const iw = img.naturalWidth;
+    const ih = img.naturalHeight;
 
-  baseScale = Math.min(scaleX, scaleY) * 0.95;
+    if (!iw || !ih) return;
 
-  updateTransform();
+    let fittedWidth = vw / iw;
+    let fittedHeight = vh / ih;
+
+    baseScale =
+        Math.min(fittedWidth, fittedHeight);
+
+    baseScale *= 0.95;
+
+    updateTransform();
 }
 
 /* RESET */
@@ -212,29 +218,46 @@ window.addEventListener("keydown", (e) => {
 });
 
 /* RENDER */
-
 function render() {
-  
+
   const nextSrc = pages[index];
 
   const preload = new Image();
 
   preload.src = nextSrc;
 
+  const applyImage = () => {
+
+    img.onload = () => {
+
+      requestAnimationFrame(() => {
+
+        resetView();
+
+        fit();
+
+      });
+
+    };
+
+    img.src = nextSrc;
+  };
+
   if (preload.decode) {
+
     preload
       .decode()
-      .then(() => {
-        img.src = nextSrc;
-      })
-      .catch(() => {
-        img.src = nextSrc;
-      });
+      .then(applyImage)
+      .catch(applyImage);
+
   } else {
-    img.src = nextSrc;
+
+    applyImage();
+
   }
 
-  info.textContent = `${index + 1} / ${pages.length}`;
+  info.textContent =
+    `${index + 1} / ${pages.length}`;
 
   document.querySelectorAll(".thumb").forEach((t, i) => {
     t.classList.toggle("active", i === index);
@@ -260,7 +283,6 @@ function next() {
   if (index < pages.length - 1) {
     index++;
 
-    resetView();
 
     render();
   }
@@ -270,7 +292,6 @@ function prev() {
   if (index > 0) {
     index--;
 
-    resetView();
 
     render();
   }

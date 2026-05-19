@@ -115,10 +115,13 @@ button:hover {
 }
 
 /* THUMB */
-
 .thumb {
   width: 110px;
-  aspect-ratio: 3 / 2;
+
+  /* zamiast sztywnego kwadratu */
+  height: auto;
+  min-height: 80px;
+  max-height: 140px;
 
   border: 2px solid transparent;
   border-radius: 4px;
@@ -145,7 +148,9 @@ button:hover {
 .thumb img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+
+  object-fit: contain;
+  display: block;
 }
 /* FULLSCREEN */
 :fullscreen .bar {
