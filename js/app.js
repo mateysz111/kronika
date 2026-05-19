@@ -50,8 +50,8 @@ function initFolders() {
 
     opt.value = name;
     opt.textContent = name
+     .replaceAll("_v2", "")
   .replaceAll("_", " ")
-  .replaceAll("#", "")
   .split(" ")
   .map(w => w ? w[0].toUpperCase() + w.slice(1) : "")
   .join(" ");
