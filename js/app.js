@@ -49,7 +49,12 @@ function initFolders() {
     const opt = document.createElement("option");
 
     opt.value = name;
-    opt.textContent = name.replaceAll("_", " ").replaceAll("#", "");
+    opt.textContent = name
+  .replaceAll("_", " ")
+  .replaceAll("#", "")
+  .split(" ")
+  .map(w => w ? w[0].toUpperCase() + w.slice(1) : "")
+  .join(" ");
 
     folderSelect.appendChild(opt);
   });
