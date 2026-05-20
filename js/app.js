@@ -32,6 +32,8 @@ const info = document.getElementById("info");
 const viewer = document.getElementById("viewer");
 const autoplayBtn = document.getElementById("autoplayBtn");
 const speedSelect = document.getElementById("speedSelect");
+const home = document.getElementById("home");
+const viewerContainer = document.getElementById("viewerContainer");
 /* LOAD */
 
 async function loadManifest() {
@@ -41,23 +43,55 @@ async function loadManifest() {
 
   initFolders();
 
-  loadFolder(Object.keys(manifest)[0]);
+  //loadFolder(Object.keys(manifest)[0]);
+  renderHome();
+}
+function setViewerMode(on) {
+  document.querySelector(".bar").classList.toggle("hidden", !on);
+}
+function openGallery(name) {
+  if (!name) {
+    goHome();
+    return;
+  }
+
+  setViewerMode(true);
+
+  home.classList.add("hidden");
+  viewerContainer.classList.remove("hidden");
+
+  folderSelect.value = name;
+
+  loadFolder(name);
 }
 
 function initFolders() {
+  /* HOME OPTION */
+  const homeOption = document.createElement("option");
+
+  homeOption.value = "";
+  homeOption.textContent = "📚 Biblioteka";
+
+  folderSelect.appendChild(homeOption);
+
+  /* GALERIE */
   Object.keys(manifest).forEach((name) => {
     const opt = document.createElement("option");
 
     opt.value = name;
+
     opt.textContent = name
-     .replaceAll("_v2", "")
-  .replaceAll("_", " ")
-  .split(" ")
-  .map(w => w ? w[0].toUpperCase() + w.slice(1) : "")
-  .join(" ");
+      .replaceAll("_v2", "")
+      .replaceAll("_", " ")
+      .split(" ")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+      .join(" ");
 
     folderSelect.appendChild(opt);
   });
+
+  /* START VALUE */
+  folderSelect.value = "";
 }
 
 /* FOLDER */
@@ -70,31 +104,91 @@ function loadFolder(name) {
   renderThumbs();
 
   resetView();
+
   stopAutoplay();
+
   render();
 }
+/* HOME */
+function renderHome() {
+  home.innerHTML = `
+      <div class="home-header">
+        <h1>SP88 Kronika</h1>
+        <p>Wybierz folder, aby rozpocząć przeglądanie kroniki.</p>
+      </div>
+    `;
+  setViewerMode(false);
+  const galleryContainer = document.createElement("div");
+  galleryContainer.className = "gallery-container";
+  Object.entries(manifest).forEach(([name, images]) => {
+    const displayName = name
+      .replaceAll("_v2", "")
+      .replaceAll("_", " ")
+      .split(" ")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+      .join(" ");
 
+    const card = document.createElement("div");
+
+    card.className = "gallery-card";
+
+    card.innerHTML = `
+            <img src="${images[0]}">
+
+            <div class="gallery-info">
+
+                <div class="gallery-title">
+                    ${displayName}
+                </div>
+
+                <div class="gallery-count">
+                    ${images.length} stron
+                </div>
+
+            </div>
+        `;
+
+    card.onclick = () => {
+      home.classList.add("hidden");
+
+      viewerContainer.classList.remove("hidden");
+
+      folderSelect.value = name;
+
+      openGallery(name);
+    };
+
+    galleryContainer.appendChild(card);
+  });
+  home.appendChild(galleryContainer);
+}
+function goHome() {
+  setViewerMode(false);
+
+  viewerContainer.classList.add("hidden");
+  home.classList.remove("hidden");
+
+  folderSelect.value = "";
+}
 /* FIT */
 
 function fitImage() {
+  const vw = viewer.clientWidth;
+  const vh = viewer.clientHeight;
 
-const vw = viewer.clientWidth;
-    const vh = viewer.clientHeight;
+  const iw = img.naturalWidth;
+  const ih = img.naturalHeight;
 
-    const iw = img.naturalWidth;
-    const ih = img.naturalHeight;
+  if (!iw || !ih) return;
 
-    if (!iw || !ih) return;
+  let fittedWidth = vw / iw;
+  let fittedHeight = vh / ih;
 
-    let fittedWidth = vw / iw;
-    let fittedHeight = vh / ih;
+  baseScale = Math.min(fittedWidth, fittedHeight);
 
-    baseScale =
-        Math.min(fittedWidth, fittedHeight);
+  baseScale *= 0.95;
 
-    baseScale *= 0.95;
-
-    updateTransform();
+  updateTransform();
 }
 
 /* RESET */
@@ -107,58 +201,43 @@ function resetView() {
   offsetX = 0;
   offsetY = 0;
 
-
   fitImage();
 }
 async function toggleFullscreen() {
-
-    if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-    } else {
-        await document.exitFullscreen();
-    }
-    
+  if (!document.fullscreenElement) {
+    await document.documentElement.requestFullscreen();
+  } else {
+    await document.exitFullscreen();
+  }
 }
 
-
 window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
 
-    clearTimeout(resizeTimer);
-
-    resizeTimer = setTimeout(() => {
-      fitImage();
-    }, 120);
-
+  resizeTimer = setTimeout(() => {
+    fitImage();
+  }, 120);
 });
 
 document.addEventListener("fullscreenchange", () => {
-
-    setTimeout(() => {
-      fitImage();
-    }, 120);
-
+  setTimeout(() => {
+    fitImage();
+  }, 120);
 });
 
 function isFullscreenLike() {
-
-    return window.innerHeight >= screen.height - 5;
+  return window.innerHeight >= screen.height - 5;
 }
 
 function updateFullscreenUI() {
+  const fs = document.fullscreenElement || isFullscreenLike();
 
-    const fs =
-        document.fullscreenElement ||
-        isFullscreenLike();
-
-    document.body.classList.toggle("fs-mode", !!fs);
+  document.body.classList.toggle("fs-mode", !!fs);
 }
 
 window.addEventListener("resize", updateFullscreenUI);
 
-document.addEventListener(
-    "fullscreenchange",
-    updateFullscreenUI
-);
+document.addEventListener("fullscreenchange", updateFullscreenUI);
 
 updateFullscreenUI();
 
@@ -202,12 +281,7 @@ function renderThumbs() {
 window.addEventListener("keydown", (e) => {
   const tag = document.activeElement.tagName;
 
-  if (
-    tag === "INPUT" ||
-    tag === "SELECT" ||
-    tag === "TEXTAREA"
-  )
-    return;
+  if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
 
   if (e.key === "ArrowRight") {
     e.preventDefault();
@@ -224,45 +298,29 @@ window.addEventListener("keydown", (e) => {
 
 /* RENDER */
 function render() {
-
   const nextSrc = pages[index];
 
   const preload = new Image();
-
   preload.src = nextSrc;
 
   const applyImage = () => {
-
     img.onload = () => {
-
       requestAnimationFrame(() => {
-
         resetView();
-
-        fit();
-
+        fitImage();
       });
-
     };
 
     img.src = nextSrc;
   };
 
   if (preload.decode) {
-
-    preload
-      .decode()
-      .then(applyImage)
-      .catch(applyImage);
-
+    preload.decode().then(applyImage).catch(applyImage);
   } else {
-
     applyImage();
-
   }
 
-  info.textContent =
-    `${index + 1} / ${pages.length}`;
+  info.textContent = `${index + 1} / ${pages.length}`;
 
   document.querySelectorAll(".thumb").forEach((t, i) => {
     t.classList.toggle("active", i === index);
@@ -288,7 +346,6 @@ function next() {
   if (index < pages.length - 1) {
     index++;
 
-
     render();
   }
 }
@@ -296,7 +353,6 @@ function next() {
 function prev() {
   if (index > 0) {
     index--;
-
 
     render();
   }
@@ -315,7 +371,6 @@ function rotateRight() {
 
   updateTransform();
 }
-
 
 /* AUTOPLAY */
 
@@ -378,7 +433,6 @@ viewer.addEventListener(
     offsetX -= (mouseX - offsetX) * (zoom / prevZoom - 1);
 
     offsetY -= (mouseY - offsetY) * (zoom / prevZoom - 1);
-
 
     updateTransform();
   },
@@ -461,7 +515,6 @@ viewer.addEventListener(
 
       zoom = Math.min(4, Math.max(0.5, zoom));
 
-
       updateTransform();
 
       return;
@@ -500,8 +553,9 @@ function toggleThumbs() {
 /* EVENTS */
 
 folderSelect.addEventListener("change", (e) => {
-  loadFolder(e.target.value);
+  openGallery(e.target.value);
 });
+
 speedSelect.addEventListener("change", (e) => {
   autoplaySpeed = Number(e.target.value);
 
